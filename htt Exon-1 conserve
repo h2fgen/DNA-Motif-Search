@@ -1,0 +1,179 @@
+
+import random
+
+def randomMotifs(dna,k,t):
+
+    cmm = []
+    cc = []
+    k = 3
+    D = {}
+    for i in range(0,len(dna)):
+        cm = []
+        for kk in range(len(dna[i])-k+1):
+            cm += [dna[i][kk:kk+k]]
+        D[i] = cm
+    for m in range(0,t):
+        ran = random.randint(0,len(D[0])-1)
+        cmm += [D[m][ran]]
+
+    return cmm
+
+
+def ProfileWithPseudocounts(Motifs):
+
+    t = len(Motifs)
+    k = len(Motifs[0])
+    profile = CountWithPseudocounts(Motifs) 
+    for symbol in profile:
+        for kk in range(0,len(profile[symbol])):
+            profile[symbol][kk] = profile[symbol][kk]/(len(Motifs) + 4)
+
+    return profile
+
+
+def CountWithPseudocounts(Motifs):
+
+    count = {}
+    for i in 'acgt':
+        count[i] = []
+        for ii in range(len(Motifs[0])):
+            count[i].append(1)
+    for i in range(len(Motifs)):
+        for j in range(len(Motifs[0])):
+            symbol = Motifs[i][j]
+            count[symbol][j] += 1
+
+    return count
+
+
+def Score(Motifs):
+
+    count = 0
+    C = Consensus(Motifs)
+    for i in Motifs:
+        for nucl1, nucl2 in zip(i,C):
+            if nucl1 != nucl2:
+                count += 1
+    return count
+
+
+def Consensus(Motifs):
+
+    k = len(Motifs[0])
+    count = Count(Motifs)
+    consensus = ""
+    for j in range(k):
+        m = 0
+        frequentSymbol = ""
+        for symbol in "acgt":
+            if count[symbol][j] > m:
+                m = count[symbol][j]
+                frequentSymbol = symbol
+        consensus += frequentSymbol
+
+    return consensus
+
+
+def Count(Motifs):
+
+    count = {}
+    for i in 'acgt':
+        count[i] = []
+        for ii in range(len(Motifs[0])):
+            count[i].append(0)
+    for i in range(len(Motifs)):
+        for j in range(len(Motifs[0])):
+            symbol = Motifs[i][j]
+            count[symbol][j] += 1
+
+    return count
+
+
+def RandomMotifs(dna,k,t):
+
+    cmm = []
+    cc = []
+    D = {}
+    for i in range(0,len(dna)):
+        cm = []
+        for kk in range(len(dna[i])-k+1):
+            cm += [dna[i][kk:kk+k]]
+        D[i] = cm
+    for m in range(0,t):
+        ran = random.randint(0,len(D[0])-1)
+        cmm += [D[m][ran]]
+
+    return cmm
+
+
+def Motifs(ca,dna):
+
+    k = len(ca['a'])
+    D = []
+    for i in range(0,len(dna)):
+        cm = []
+        cc = []
+        for kk in range(len(dna[i])-k+1):
+            cm += [dna[i][kk:kk+k]]
+        for i in cm:
+            cc += [Pr(i,ca)]
+        D += [cm[cc.index(max(cc))]]
+
+    return D
+
+
+def Pr(DNA, Profile):
+
+    p = 1
+    for i in range(0,len(DNA)):
+        p *= Profile[DNA[i]][i]
+
+    return p
+
+
+def RandomizedMotifSearch(Dna, k, t):
+
+    B = RandomMotifs(Dna, k, t)
+    BestMotifs = B
+
+    while True:
+        Profile = ProfileWithPseudocounts(B)
+        B = Motifs(Profile, Dna)
+        if Score(B) < Score(BestMotifs):
+            BestMotifs = B
+        else:
+            return BestMotifs
+
+
+# from Motifs.py below this line
+
+# Copy linked human, Rhesus, mouse, and rat httExon1 dataset below.
+Dna = ['atggcgaccctggaaaagctgatgaaggccttcgagtccctcaagtccttccagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagcagccgccaccgccgccgccgccgccgccgcctcctcagcttcctcagccgccgccgcaggcacagccgctgctgcctcagccgcagccgcccccgccgccgcccccgccgccacccggcccggctgtggctgaggagccgctgcaccgaccaaagaaagaactttcagctaccaagaaagaccgtgtgaatcattgtctgacaatatgtgaaaacatagtggcacagtctgtcagaaattctccagaatttcagaaacttctgggcatcgctatggaactttttctgctgtgcagtgatgacgcagagtcagatgtcaggatggtggctgacgaatgcctcaacaaagttatcaaagctttgatggattctaatcttccaaggttacagctcgagctctataaggaaattaaaaagaatggtgcccctcggagtttgcgtgctgccctgtggaggtttgctgagctggctcacctggttcggcctcagaaatgcaggccttacctggtgaaccttctgccgtgcctgactcgaacaagcaagagacccgaagaatcagtccaggagaccttggctgcagctgttcccaaaattatggcttcttttggcaattttgcaaatgacaatgaaattaaggttttgttaaaggccttcatagcgaacctgaagtcaagctcccccaccattcggcggacagcggctggatcagcagtgagcatctgccagcactcaagaaggacacaatatttctatagttggcta',
+'atggcgaccctggaaaagctgatgaaggccttcgagtctctcaagtccttccagcagcagcagcagcagcagcagcagcaacagccgccgccgccgccgccgccgccgcctcctcctcctcagcttcctcagccgccgcaggcacagccgatgctgcctcagccgcagccgcccccgccgccgcccccgccaccacccggcccggctgtggctgaggagccgctgcaccgaccaaagaaagaactttcagctaccaagaaagaccgtgtgaatcattgtctgacaatatgtgaaaacatagtggcacagtctgtcagaaattctccagaatttcagaaacttctgggcatcgctatggaactttttctgctgtgcagtgatgacgcagagtcggatgtcagaatggtggctgatgaatgcctcaacaaagttatcaaagctttgatggattctaatcttccaaggttacagctcgagctctataaagaaattaaaaagaatggtgcccctcggagtttgcgtgctgccctgtggaggtttgccgagctggctcacctggttcggcctcagaaatgcaggccttacctggtgaaccttctgccgtgcctaagtcgaacaagcaagagacccgaggaatcagtccaggagaccttggctgcagctgttcccaaaattatggcttctttcggcaattttgcaaatgacaatgaaattaaggttttgttaaaggccttcatagcgaacctgaagtcaagctcccccactattcggcggacagctgctggatcagcagtgagcatctgccagcactcaagaaggacacagtatttctatagctggctactaaatgtgctcttaggcttactggttcctgtcgag',
+'atggattctaatcttccaaggctacagttagaactctataaggaaattaaaaagaatggtgctcctcgaagtttgcgtgctgccctgtggaggtttgctgagctggctcacctggttcgacctcagaagtgcaggccttacctggtgaatcttcttccatgcctgacccgaacaagcaaaagaccggaggaatcagttcaggagaccttggctgcagctgttcctaaaattatggcttcttttggcaatttcgcaaatgacaatgaaattaaggttctgttgaaagctttcatagcaaatctgaagtcaagctctcccaccgtgcggcggacagcagccggctcagccgtgagcatctgccaacattctaggaggacacagtacttctacaactggctccttaatgtcctcctaggtctgctggttcccatggaagaagagcactccactctcctgatcctcggtgtgttgctcacattgaggtgtctagtgcccttgctccagcagcaggtcaaggacacaagtctaaaaggcagctttggggtgacacggaaagaaatggaagtctctccttctacagagcagcttgtccaggtttatgaactgactttgcatcatactcagcaccaagaccacaatgtggtgacaggggcactggagctcctgcagcagctcttccgtacccctccacctgaactcctgcaagcactgaccacaccaggagggcttgggcagctcactctggttcaagaagaggcccggggccgaggccgcagcgggagcatcgtggagcttttagctggagggggttcctcgtgcagccctgtcctctcaagaaagcagaaaggcaaagtgctcttaggagaggaagaagccttg',
+'atggcaaccctggaaaaactgatgaaggctttcgagtcgctcaagtcgttccagcagcaacagcagcagcagcagccgccgccgcaggcgccgccaccaccgccgccgccgccgcctcaaccccctcagccgccgcctcaggggcagccgccgccaccaccgccgctgccaggtccggccgaggagccgctgcaccgaccaaagaaggaactctcagccaccaagaaggaccgtgtgaatcactgtctaacaatatgtgaaaacattgtggcacagtctctcagaaattctccagaatttcagaaactcttgggcattgctatggaactgtttctgctgtgcagcgacgatgcggagtcagacgtcagaatggtggctgatgagtgcctcaacaaagtcatcaaagctttgatggactctaatcttccaaggctacagttagaactctataaggaaattaaaaagaatggtgctcctcgaagtttgcgtgcagctctgtggaggtttgctgagctggctcacctggttcgacctcagaagtgcaggccttatctggtgaatcttcttccatgtttgacccgaacaagcaaacgaccggaggagtcagttcaggagactttggctgcagctgttcctaaaattatggcctcttttggcaatttcgcgaatgacaatgaaattaaggttctattgaaagctttcatagcaaatctgaagtcaagctctcccactgtgcggcggacagcagctgggtcagcagtgagtatctgccagcactctaggaggacacagtacttctacaactggctcctgaatgtgctcctaggtttgctggttcccatggaggaagaccaccccactctcctgatccttggtgtg']
+
+
+# set t equal to the number of strings in Dna, k equal to 15, and N equal to 100.
+t=len(Dna)
+k=108
+N=100
+# Call RandomizedMotifSearch(Dna, k, t) N times, storing the best-scoring set of motifs
+# resulting from this algorithm in a variable called BestMotifs
+def RepeatedRandomizedMotifSearch(Dna, k, t):
+    BestScore = float('inf')
+    BestMotifs = []
+    for i in range(N):
+        Motifs = RandomizedMotifSearch(Dna, k, t)
+        CurrScore = Score(Motifs)
+        if CurrScore < BestScore:
+            BestScore = CurrScore
+            BestMotifs = Motifs
+    return BestMotifs
+BestMotifs = RepeatedRandomizedMotifSearch(Dna, k, t)
+# Print the BestMotifs variable and score:
+print(BestMotifs)
+print(Score(BestMotifs))
+
+           
+
